@@ -9,13 +9,18 @@ import com.joelmofraga.artists_albums_api.auth.repository.RoleRepository;
 import com.joelmofraga.artists_albums_api.auth.repository.UserRepository;
 import com.joelmofraga.artists_albums_api.security.JwtService;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AuthService {
 
+    private static final String DEFAULT_ROLE_NAME = "USER"; // no banco: USER (sem ROLE_)
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final UserRepository userRepository;
@@ -36,34 +41,49 @@ public class AuthService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    @Transactional(readOnly = true)
     public LoginResponse login(LoginRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
-        );
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
+            );
+        } catch (AuthenticationException ex) {
+            // evita vazar detalhes; mantém resposta padrão de credencial inválida
+            throw new BadCredentialsException("Invalid credentials");
+        }
 
         AppUser user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         String token = jwtService.generateToken(user);
         return new LoginResponse(token);
     }
 
+    @Transactional
     public void register(RegisterRequest request) {
-        if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("Username already exists");
+        String username = request.getUsername();
+
+        if (username == null || username.trim().isEmpty()) {
+            throw new IllegalArgumentException("Username is required");
+        }
+        if (request.getPassword() == null || request.getPassword().isEmpty()) {
+            throw new IllegalArgumentException("Password is required");
         }
 
-        Role roleUser = roleRepository.findByName("ROLE_USER")
-                .orElseGet(() -> {
-                    Role r = new Role();
-                    r.setName("ROLE_USER");
-                    return roleRepository.save(r);
-                });
+        if (userRepository.existsByUsername(username)) {
+            throw new IllegalStateException("Username already exists");
+        }
+
+        // Role no banco deve ser: USER (sem prefixo ROLE_)
+        Role roleUser = roleRepository.findByName(DEFAULT_ROLE_NAME)
+                .orElseGet(() -> roleRepository.save(new Role(DEFAULT_ROLE_NAME)));
 
         AppUser user = new AppUser();
-        user.setUsername(request.getUsername());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole(roleUser);
+        user.setUsername(username);
+        user.setPasswordHash(passwordEncoder.encode(request.getPassword())); // <-- correto pro seu AppUser
+
+        // vínculo N:N via tabela user_role (UserRole) usando o helper
+        user.addRole(roleUser);
 
         userRepository.save(user);
     }
