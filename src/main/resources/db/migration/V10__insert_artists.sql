@@ -1,16 +1,8 @@
-CREATE TABLE artist (
-  id          BIGSERIAL PRIMARY KEY,
-  name        VARCHAR(200) NOT NULL,
-  country     VARCHAR(100),
-  genre       VARCHAR(100),
-  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
-CREATE INDEX ix_artist_name ON artist (name);
+BEGIN;
 
 INSERT INTO artist (name, country, genre, created_at, updated_at)
 VALUES
+
 ('Legião Urbana', 'Brasil', 'Rock', now(), now()),
 ('Titãs', 'Brasil', 'Rock', now(), now()),
 ('Skank', 'Brasil', 'Pop Rock', now(), now()),
@@ -29,10 +21,10 @@ VALUES
 ('Metallica', 'USA', 'Heavy Metal', now(), now()),
 ('Nirvana', 'USA', 'Grunge', now(), now()),
 ('Pearl Jam', 'USA', 'Rock', now(), now()),
-('Stereophonics', 'UK', 'Rock', now(), now()),
-('Serj Tankian', 'USA', 'Rock', now(), now()),
-('Guns N’ Roses', 'USA', 'Rock', now(), now()),
-('Mike Shinoda', 'USA', 'Rock', now(), now()),
+('Stereophonics, 'UK', 'Rock', now(), now()),
+('Serj Tankian, 'USA', 'Rock', now(), now()),
+('Guns N’ Roses , 'USA', 'Rock', now(), now()),
+('Mike Shinoda  , 'USA', 'Rock', now(), now()),
 ('Red Hot Chili Peppers', 'USA', 'Funk Rock', now(), now()),
 ('Linkin Park', 'USA', 'Alternative Rock', now(), now()),
 ('Coldplay', 'UK', 'Alternative Rock', now(), now()),
@@ -46,6 +38,6 @@ VALUES
 ('Bon Jovi', 'USA', 'Hard Rock', now(), now()),
 ('Evanescence', 'USA', 'Alternative Metal', now(), now()),
 ('Djavan', 'Brasil', 'MPB', now(), now()),
-('Michael Teló', 'Brasil', 'Sertanejo', now(), now());
+('Michael Teló', 'Brasil', 'Sertanejo', now(), now()),
 
 COMMIT;

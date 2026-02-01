@@ -1,0 +1,18 @@
+INSERT INTO album_artist_role (code, description) VALUES
+('PRIMARY',        'Artista ou banda principal do álbum'),
+('FEATURED',       'Participação especial (feat.)'),
+('GUEST',          'Artista convidado'),
+('COMPOSER',       'Compositor das músicas'),
+('LYRICIST',       'Autor das letras'),
+('ARRANGER',       'Responsável pelos arranjos'),
+('PRODUCER',       'Produtor musical'),
+('EXEC_PRODUCER',  'Produtor executivo'),
+('ENGINEER',       'Engenheiro de som'),
+('MIXING',         'Responsável pela mixagem'),
+('MASTERING',      'Responsável pela masterização'),
+('CONDUCTOR',      'Regente'),
+('ORCHESTRA',      'Orquestra ou grupo instrumental'),
+('REMIXER',        'Responsável por remix'),
+('DJ',             'DJ ou performance eletrônica'),
+('COLLABORATOR',   'Colaborador geral'),
+('SOUNDTRACK',     'Participação em trilha sonora');
