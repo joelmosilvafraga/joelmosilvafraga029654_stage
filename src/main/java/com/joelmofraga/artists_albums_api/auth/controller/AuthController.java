@@ -1,8 +1,6 @@
 package com.joelmofraga.artists_albums_api.auth.controller;
 
-import com.joelmofraga.artists_albums_api.auth.dto.LoginRequest;
-import com.joelmofraga.artists_albums_api.auth.dto.LoginResponse;
-import com.joelmofraga.artists_albums_api.auth.dto.RegisterRequest;
+import com.joelmofraga.artists_albums_api.auth.dto.*;
 import com.joelmofraga.artists_albums_api.auth.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -13,10 +11,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import static com.joelmofraga.artists_albums_api.config.ApiPaths.*;
+
 
 @Tag(name = "Auth", description = "Endpoints de autenticação (login e registro)")
 @RestController
-@RequestMapping("/auth")
+@RequestMapping(AUTH)
 public class AuthController {
 
     private final AuthService authService;
@@ -80,4 +80,10 @@ public class AuthController {
         authService.register(request);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<RefreshResponse> refresh(@RequestBody RefreshRequest request) {
+        return ResponseEntity.ok(authService.refresh(request.refreshToken()));
+    }
+
 }

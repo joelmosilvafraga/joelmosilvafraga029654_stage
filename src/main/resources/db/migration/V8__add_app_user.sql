@@ -8,3 +8,12 @@ CREATE TABLE app_user (
 );
 
 CREATE INDEX ix_app_user_username ON app_user (username);
+
+INSERT INTO app_user (username, password_hash, enabled)
+VALUES
+  ('administrador',   '$2a$10$5igV0e7hIs0nKScuO50lJezI1uHPhcPLFuji4qN4FSij3FsZPuJfW', true),
+  ('usuario_gestor', '$2a$10$5igV0e7hIs0nKScuO50lJezI1uHPhcPLFuji4qN4FSij3FsZPuJfW', true),
+  ('usuario_editor',  '$2a$10$5igV0e7hIs0nKScuO50lJezI1uHPhcPLFuji4qN4FSij3FsZPuJfW', true),
+  ('usuario_1',    '$2a$10$5igV0e7hIs0nKScuO50lJezI1uHPhcPLFuji4qN4FSij3FsZPuJfW', true),
+  ('usuario_2',  '$2a$10$5igV0e7hIs0nKScuO50lJezI1uHPhcPLFuji4qN4FSij3FsZPuJfW', true)
+ON CONFLICT (username) DO NOTHING;

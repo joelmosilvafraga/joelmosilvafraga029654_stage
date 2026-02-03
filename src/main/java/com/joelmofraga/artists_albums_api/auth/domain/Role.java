@@ -14,12 +14,30 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // exemplo: ADMIN, USER (sem prefixo ROLE_ no banco)
-    @Column(nullable = false, unique = true, length = 50)
+    // No banco é "code" (ADMIN, USER, etc)
+    @Column(name = "code", nullable = false, unique = true, length = 50)
     private String name;
+
+    @Column(nullable = false, length = 150)
+    private String description;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
+
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt = Instant.now();
+
+    @PrePersist
+    void prePersist() {
+        Instant now = Instant.now();
+        this.createdAt = now;
+        this.updatedAt = now;
+    }
+
+    @PreUpdate
+    void preUpdate() {
+        this.updatedAt = Instant.now();
+    }
 
     @OneToMany(mappedBy = "role")
     private Set<UserRole> userRoles = new HashSet<>();
@@ -34,10 +52,15 @@ public class Role {
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
+    // mantém o nome "getName" mas lê/escreve na coluna "code"
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+
     public Instant getCreatedAt() { return createdAt; }
+    public Instant getUpdatedAt() { return updatedAt; }
 
     public Set<UserRole> getUserRoles() { return userRoles; }
     public void setUserRoles(Set<UserRole> userRoles) { this.userRoles = userRoles; }

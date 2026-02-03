@@ -1,16 +1,18 @@
 package com.joelmofraga.artists_albums_api.artist.service;
 
+import com.joelmofraga.artists_albums_api.album.dto.AlbumResponse;
 import com.joelmofraga.artists_albums_api.artist.domain.Artist;
 import com.joelmofraga.artists_albums_api.artist.dto.ArtistCreateRequest;
 import com.joelmofraga.artists_albums_api.artist.dto.ArtistResponse;
 import com.joelmofraga.artists_albums_api.artist.repository.ArtistRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Sort;
 import java.util.List;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Page;
-
+import org.springframework.web.server.ResponseStatusException;
 
 
 @Service
@@ -60,8 +62,6 @@ public class ArtistService {
     }
 
 
-
-
     public List<ArtistResponse> searchByName(String name, String sortDir) {
         Sort.Direction direction = parseDirection(sortDir);
         Sort sort = Sort.by(direction, "name");
@@ -85,4 +85,37 @@ public class ArtistService {
         if ("desc".equalsIgnoreCase(sortDir)) return Sort.Direction.DESC;
         return Sort.Direction.ASC;
     }
+
+    public ArtistResponse getById(Long id) {
+        Artist artist = artistRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Artist not found: " + id));
+        return toResponse(artist);
+    }
+
+    @Transactional
+    public ArtistResponse update(Long id, ArtistCreateRequest request) {
+        Artist artist = artistRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Artist not found: " + id));
+
+        // Atualiza campos (PUT = atualização completa do recurso)
+        artist.setName(request.getName().trim());
+        artist.setCountry(request.getCountry() != null ? request.getCountry().trim() : null);
+        artist.setGenre(request.getGenre() != null ? request.getGenre().trim() : null);
+
+        Artist saved = artistRepository.save(artist); // @PreUpdate ajusta updatedAt
+        return toResponse(saved);
+    }
+
+
+    private ArtistResponse toResponse(Artist a) {
+        return new ArtistResponse(
+                a.getId(),
+                a.getName(),
+                a.getCountry(),
+                a.getGenre(),
+                a.getCreatedAt(),
+                a.getUpdatedAt()
+        );
+    }
+
 }

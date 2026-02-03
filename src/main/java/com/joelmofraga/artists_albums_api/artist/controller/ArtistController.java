@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -21,9 +22,11 @@ import io.swagger.v3.oas.annotations.Parameter;
 import java.net.URI;
 import java.util.List;
 
+import static com.joelmofraga.artists_albums_api.config.ApiPaths.ARTISTS;
+
 @Tag(name = "Artists", description = "Endpoints de artistas")
 @RestController
-@RequestMapping("/artists")
+@RequestMapping(ARTISTS)
 public class ArtistController {
 
     private final ArtistService artistService;
@@ -40,6 +43,7 @@ public class ArtistController {
             @ApiResponse(responseCode = "400", description = "Requisição inválida", content = @Content),
             @ApiResponse(responseCode = "401", description = "Não autenticado", content = @Content)
     })
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ArtistResponse> create(
             @Valid @RequestBody ArtistCreateRequest request,
@@ -111,5 +115,41 @@ public class ArtistController {
 
         Page<ArtistResponse> result = artistService.listAll(page, size, sort);
         return ResponseEntity.ok(result);
+    }
+
+
+    @Operation(summary = "Buscar artista por id", description = "Retorna um artista pelo id.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ArtistResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Não encontrado", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Não autenticado", content = @Content)
+    })
+    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ArtistResponse> getById(
+            @Parameter(description = "ID do artista", example = "1")
+            @PathVariable Long id
+    ) {
+        return ResponseEntity.ok(artistService.getById(id));
+    }
+
+    @Operation(summary = "Atualizar artista", description = "Atualiza as informações de um artista pelo id.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Atualizado com sucesso",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ArtistResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Requisição inválida", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Não encontrado", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Não autenticado", content = @Content)
+    })
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ArtistResponse> update(
+            @Parameter(description = "ID do artista", example = "1")
+            @PathVariable Long id,
+            @Valid @RequestBody ArtistCreateRequest request
+    ) {
+        return ResponseEntity.ok(artistService.update(id, request));
     }
 }
