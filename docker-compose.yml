@@ -32,3 +32,4 @@ volumes:
   postgres_data:
   minio_data:
     #TESTE
+  #teste
